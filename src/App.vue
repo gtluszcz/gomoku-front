@@ -1,16 +1,16 @@
 <template>
     <div id="app">
-        <HelloWorld/>
+        <Board/>
     </div>
 </template>
 
 <script>
-    import HelloWorld from './components/HelloWorld'
+    import Board from './components/Board'
 
     export default {
         name: 'App',
         components: {
-            HelloWorld,
+            Board,
         },
     }
 </script>

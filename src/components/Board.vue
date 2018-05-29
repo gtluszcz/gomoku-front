@@ -81,10 +81,9 @@
 
                         //if found neighbour
                         if (this.board[cell.x+x][cell.y+y].value === type){
-                            console.log(x,y)
                             this.checkForWinInDirection(this.board[cell.x+x][cell.y+y],type,2,x,y)
-
                         }
+
                     }
                 }
             },
@@ -95,7 +94,7 @@
                 }
 
                 //check if exists
-                if (cell.x+dir_x<0 || cell.y+dir_y<0)
+                if (cell.x+dir_x<0 || cell.y+dir_y<0 || cell.x+dir_x>=this.board.length || cell.y+dir_y>=this.board[0].length)
                     return
 
                 if (this.board[cell.x+dir_x][cell.y+dir_y].value === type){

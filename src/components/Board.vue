@@ -40,17 +40,18 @@
                     if (this.turn === 0) {
                         this.board[cell.x][cell.y].value = 0
                         this.turn = 1
-
+                        this.checkForWin(0)
                     }
                     else if (this.turn === 1){
                         this.board[cell.x][cell.y].value = 1
                         this.turn = 0
+                        this.checkForWin(1)
 
                     }
-                    this.checkForWin()
+
                 }
             },
-            checkForWin(){
+            checkForWin(type){
                 let o_arr = []
                 let x_arr = []
                 for (let arr of this.board){
@@ -65,14 +66,16 @@
                 //console.log(o_arr)
 
 
-                for(let cell of o_arr){
-                    this.checkNeighboursForWin(cell,0)
+                if (type === 0){
+                    for(let cell of o_arr){
+                        this.checkNeighboursForWin(cell,0)
+                    }
                 }
-
-                for(let cell of x_arr){
-                    this.checkNeighboursForWin(cell,1)
+                else if (type === 1){
+                    for(let cell of x_arr){
+                        this.checkNeighboursForWin(cell,1)
+                    }
                 }
-
             },
             checkNeighboursForWin(cell,type){
                 for(let x=-1;x<2;x++){

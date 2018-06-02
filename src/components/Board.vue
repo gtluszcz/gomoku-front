@@ -42,13 +42,13 @@
                     if (this.turn === 0) {
                         this.board[cell.x][cell.y].value = 0
                         this.turn = 1
-                        if (logic.checkForWin(0))
+                        if (logic.checkNeighboursForWin(this.board[cell.x][cell.y],0))
                             this.gameover = 0
                     }
                     else if (this.turn === 1) {
                         this.board[cell.x][cell.y].value = 1
                         this.turn = 0
-                        if (logic.checkForWin(1))
+                        if (logic.checkNeighboursForWin(this.board[cell.x][cell.y],1))
                             this.gameover = 1
                     }
 
@@ -59,7 +59,7 @@
             for (let i = 0; i < 100; i++) {
                 let arr = []
                 for (let j = 0; j < 100; j++) {
-                    arr.push({ value: '', x: i, y: j })
+                    arr.push({ value: (Math.random() > 0.8) ?((Math.random()>0.5) ? 1:0):'', x: i, y: j })
                 }
                 this.board.push(arr)
             }

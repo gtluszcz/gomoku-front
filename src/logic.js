@@ -6,7 +6,7 @@ export default class Logic {
         this.board = board
     }
 
-    checkForWin(type) {
+    globalCheckForWin(type) {
         let array = []
         for (let arr of this.board) {
             for (let cell of arr) {
@@ -24,7 +24,37 @@ export default class Logic {
     }
 
 
-    checkNeighboursForWin(cell, type) {
+    checkNeighboursForWin(cell) {
+
+        let scores = this.getAdjacent(cell,cell.value)
+
+
+        if (
+            scores[0][0] + scores[2][2] >= 4 ||
+            scores[0][1] + scores[2][1] >= 4 ||
+            scores[1][0] + scores[1][2] >= 4 ||
+            scores[2][0] + scores[0][2] >= 4
+        ){
+            return true
+        }
+        else{
+            return false
+        }
+    }
+
+    // returns [
+    //     [0, 0, 0],
+    //     [0, 0, 0],
+    //     [0, 0, 0],
+    // ]
+    //where integers are the number of adjacent cells of type in this direction
+    getAdjacent(cell,type){
+        let adjacent = [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+        ]
+
         for (let x = -1; x < 2; x++) {
             for (let y = -1; y < 2; y++) {
                 //search all neighbours
@@ -38,29 +68,32 @@ export default class Logic {
                 if (cell.x + x < 0 || cell.y + y < 0 || cell.x + x >= this.board.length || cell.y + y >= this.board[0].length)
                     continue
 
+
                 //if found neighbour
                 if (this.board[cell.x + x][cell.y + y].value === type) {
-                    if (this.checkForWinInDirection(this.board[cell.x + x][cell.y + y], type, 2, x, y) === true) {
-                        return true
-                    }
+                    adjacent[x+1][y+1] = this.checkForCellsInDirection(this.board[cell.x + x][cell.y + y], type, 1, x, y)
+
                 }
             }
         }
-        return false
+
+        return adjacent
     }
 
-    checkForWinInDirection(cell, type, step, dir_x, dir_y) {
+
+    //recursive function that returns amount of continuous adjacent cells of certain type starting from cell.
+    checkForCellsInDirection(cell, type, step, dir_x, dir_y) {
         if (step === POINTS_TO_WIN) {
-            return true
+            return step
         }
 
         //check if exists
         if (cell.x + dir_x < 0 || cell.y + dir_y < 0 || cell.x + dir_x >= this.board.length || cell.y + dir_y >= this.board[0].length)
-            return false
+            return step
 
         if (this.board[cell.x + dir_x][cell.y + dir_y].value === type) {
-            return this.checkForWinInDirection(this.board[cell.x + dir_x][cell.y + dir_y], type, step + 1, dir_x, dir_y)
+            return this.checkForCellsInDirection(this.board[cell.x + dir_x][cell.y + dir_y], type, step + 1, dir_x, dir_y)
         }
-        return false
+        return step
     }
 }

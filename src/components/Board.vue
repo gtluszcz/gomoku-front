@@ -16,7 +16,7 @@
             <div class="flex flex-no-shrink" v-for="array in this.board" :key="array.id">
                 <div @click="clickOnTile(cell)"
                      class="flex-no-shrink w-6 h-6 border border-grey-lightest text-center bg hover:border-grey"
-                     :class="['bg-o','bg-x'][cell.value]" v-for="cell in array" :key="cell.id"></div>
+                     :class="['bg-o','bg-x','bg-green'][cell.value]" v-for="cell in array" :key="cell.id"></div>
             </div>
         </div>
     </div>
@@ -40,16 +40,36 @@
             clickOnTile(cell) {
                 if (cell.value === '') {
                     if (this.turn === 0) {
-                        this.board[cell.x][cell.y].value = 0
-                        this.turn = 1
-                        if (logic.checkNeighboursForWin(this.board[cell.x][cell.y],0))
+                        //set O in coordinates of cell.x and cell.y
+                        const newcell = logic.setO(cell.x,cell.y,logic.o_arr,logic.board)
+
+                        // check if O won
+                        if (logic.checkNeighboursForWin(newcell))
                             this.gameover = 0
+                        else {
+                            //change turn
+                            this.turn = 1
+
+                            //computing AI move
+                            let cell2 = logic.moveAI(1)
+                            // check if AI won
+                            if (logic.checkNeighboursForWin(this.board[cell2.x][cell2.y]))
+                                this.gameover = 1
+
+                            //change turn
+                            this.turn = 0
+                        }
                     }
                     else if (this.turn === 1) {
-                        this.board[cell.x][cell.y].value = 1
-                        this.turn = 0
-                        if (logic.checkNeighboursForWin(this.board[cell.x][cell.y],1))
+                        //set X in coordinates of cell.x and cell.y
+                        const newcell = logic.setX(cell.x,cell.y,logic.x_arr,logic.board)
+
+                        // check if X won
+                        if (logic.checkNeighboursForWin(newcell))
                             this.gameover = 1
+
+                        //change turn
+                        this.turn = 0
                     }
 
                 }
@@ -59,7 +79,7 @@
             for (let i = 0; i < 100; i++) {
                 let arr = []
                 for (let j = 0; j < 100; j++) {
-                    arr.push({ value: (Math.random() > 0.8) ?((Math.random()>0.5) ? 1:0):'', x: i, y: j })
+                    arr.push({ value: '', x: i, y: j })
                 }
                 this.board.push(arr)
             }

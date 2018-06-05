@@ -1,19 +1,49 @@
 
+import AI from './AI'
+
+
 const POINTS_TO_WIN = 5
+const LEVELS_TO_PREDICT = 3
 
 export default class Logic {
     constructor(board){
         this.board = board
+        this.x_arr = []
+        this.o_arr = []
     }
 
+    setX(x,y){
+        this.board[x][y].value = 1
+        this.x_arr.push(this.board[x][y])
+        return this.board[x][y]
+    }
+
+    setO(x,y){
+        this.board[x][y].value = 0
+        this.o_arr.push(this.board[x][y])
+        return this.board[x][y]
+    }
+
+
+    moveAI(type){
+
+        const computer = new AI(
+            JSON.parse(JSON.stringify( this.board )),
+            JSON.parse(JSON.stringify( this.x_arr )),
+            JSON.parse(JSON.stringify( this.o_arr ))
+        )
+
+        let move = computer.IntelligentMove(type)
+
+        return (type === 1) ? this.setX(move.x,move.y) : this.setO(move.x,move.y)
+    }
+
+
     globalCheckForWin(type) {
-        let array = []
-        for (let arr of this.board) {
-            for (let cell of arr) {
-                if (cell.value === type)
-                    array.push(cell)
-            }
-        }
+        if (type !== 1 && type !== 0)
+            return
+
+        const array = (type === 1) ? this.x_arr : this.o_arr
 
         for (let cell of array) {
             if (this.checkNeighboursForWin(cell, type)) {
@@ -23,17 +53,15 @@ export default class Logic {
         return false
     }
 
-
     checkNeighboursForWin(cell) {
 
-        let scores = this.getAdjacent(cell,cell.value)
-
+        let scores = this.getAdjacent(cell,cell.value,this.board)
 
         if (
-            scores[0][0] + scores[2][2] >= 4 ||
-            scores[0][1] + scores[2][1] >= 4 ||
-            scores[1][0] + scores[1][2] >= 4 ||
-            scores[2][0] + scores[0][2] >= 4
+            scores[0][0] + scores[2][2] >= (POINTS_TO_WIN -1) ||
+            scores[0][1] + scores[2][1] >= (POINTS_TO_WIN -1) ||
+            scores[1][0] + scores[1][2] >= (POINTS_TO_WIN -1) ||
+            scores[2][0] + scores[0][2] >= (POINTS_TO_WIN -1)
         ){
             return true
         }
@@ -47,8 +75,8 @@ export default class Logic {
     //     [0, 0, 0],
     //     [0, 0, 0],
     // ]
-    //where integers are the number of adjacent cells of type in this direction
-    getAdjacent(cell,type){
+    //where integers are the number of continuous adjacent cells of type in this direction
+    getAdjacent(cell,type,board){
         let adjacent = [
             [0, 0, 0],
             [0, 0, 0],
@@ -65,13 +93,13 @@ export default class Logic {
                 }
 
                 //check if exists
-                if (cell.x + x < 0 || cell.y + y < 0 || cell.x + x >= this.board.length || cell.y + y >= this.board[0].length)
+                if (cell.x + x < 0 || cell.y + y < 0 || cell.x + x >= board.length || cell.y + y >= board[0].length)
                     continue
 
 
                 //if found neighbour
-                if (this.board[cell.x + x][cell.y + y].value === type) {
-                    adjacent[x+1][y+1] = this.checkForCellsInDirection(this.board[cell.x + x][cell.y + y], type, 1, x, y)
+                if (board[cell.x + x][cell.y + y].value === type) {
+                    adjacent[x+1][y+1] = this.checkForCellsInDirection(board[cell.x + x][cell.y + y], type, 1, x, y)
 
                 }
             }
@@ -79,7 +107,6 @@ export default class Logic {
 
         return adjacent
     }
-
 
     //recursive function that returns amount of continuous adjacent cells of certain type starting from cell.
     checkForCellsInDirection(cell, type, step, dir_x, dir_y) {

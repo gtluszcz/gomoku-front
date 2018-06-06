@@ -25,7 +25,7 @@ export default class Logic {
     }
 
 
-    moveAI(type){
+    moveAI(){
 
         const computer = new AI(
             JSON.parse(JSON.stringify( this.board )),
@@ -33,9 +33,10 @@ export default class Logic {
             JSON.parse(JSON.stringify( this.o_arr ))
         )
 
-        let move = computer.IntelligentMove(type)
+        console.log('cos')
+        let move = computer.IntelligentMove()
 
-        return (type === 1) ? this.setX(move.x,move.y) : this.setO(move.x,move.y)
+        return this.setX(move.x,move.y)
     }
 
 

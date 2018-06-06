@@ -51,7 +51,7 @@
                             this.turn = 1
 
                             //computing AI move
-                            let cell2 = logic.moveAI(1)
+                            let cell2 = logic.moveAI()
                             // check if AI won
                             if (logic.checkNeighboursForWin(this.board[cell2.x][cell2.y]))
                                 this.gameover = 1
@@ -84,6 +84,7 @@
                 this.board.push(arr)
             }
             logic = new Logic(this.board)
+            logic.setX(20,20)
         },
     }
 </script>

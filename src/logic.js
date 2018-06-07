@@ -1,44 +1,81 @@
-
-import AI from './AI'
-
+import axios from 'axios'
 
 const POINTS_TO_WIN = 5
 const LEVELS_TO_PREDICT = 3
+var instance = axios.create({ baseURL: 'http://localhost:8080/gomoku/v1/logic' })
 
 export default class Logic {
-    constructor(board){
+    constructor(board,turn,gameover) {
         this.board = board
         this.x_arr = []
         this.o_arr = []
+        this.turn = turn
+        this.gameover = gameover
+        this.caniMove = true
     }
 
-    setX(x,y){
+    setX(x, y) {
+        const string = '/setcell/' + x + '/' + y + '/1'
+
+        instance.get(string)
+            .then((response) => {
+                console.log(response)
+            })
+            .catch(function (error) {
+                console.log(error)
+            })
+
         this.board[x][y].value = 1
         this.x_arr.push(this.board[x][y])
         return this.board[x][y]
     }
 
-    setO(x,y){
+    setO(x, y) {
+        const string = '/setcell/' + x + '/' + y + '/0'
+        instance.get(string)
+            .then((response) => {
+                console.log(response)
+                // check if O won
+                if (this.checkNeighboursForWin(this.board[x][y]))
+                    this.gameover.value = 0
+                else {
+                    //change turn
+                    this.turn.value = 1
+
+                    //computing AI move
+                    this.moveAI()
+                }
+            })
+            .catch(function (error) {
+                console.log(error)
+            })
         this.board[x][y].value = 0
         this.o_arr.push(this.board[x][y])
         return this.board[x][y]
     }
 
+    moveAI() {
 
-    moveAI(){
+        instance.get('/nextmove')
+            .then((response) => {
 
-        const computer = new AI(
-            JSON.parse(JSON.stringify( this.board )),
-            JSON.parse(JSON.stringify( this.x_arr )),
-            JSON.parse(JSON.stringify( this.o_arr ))
-        )
+                console.log(response)
+                console.log(this.turn.value)
+                this.setX(response.data.x,response.data.y)
+                if (this.checkNeighboursForWin(this.board[response.data.x][response.data.y]))
+                    this.gameover.value = 1
+                else{
+                    this.turn.value = 0
+                    console.log(this.turn.value)
+                }
 
-        console.log('cos')
-        let move = computer.IntelligentMove()
+            })
+            .catch(function (error) {
+                console.log(error)
+            })
 
-        return this.setX(move.x,move.y)
+        return
     }
-
 
     globalCheckForWin(type) {
         if (type !== 1 && type !== 0)
@@ -56,17 +93,17 @@ export default class Logic {
 
     checkNeighboursForWin(cell) {
 
-        let scores = this.getAdjacent(cell,cell.value,this.board)
+        let scores = this.getAdjacent(cell, cell.value, this.board)
 
         if (
-            scores[0][0] + scores[2][2] >= (POINTS_TO_WIN -1) ||
-            scores[0][1] + scores[2][1] >= (POINTS_TO_WIN -1) ||
-            scores[1][0] + scores[1][2] >= (POINTS_TO_WIN -1) ||
-            scores[2][0] + scores[0][2] >= (POINTS_TO_WIN -1)
-        ){
+            scores[0][0] + scores[2][2] >= (POINTS_TO_WIN - 1) ||
+            scores[0][1] + scores[2][1] >= (POINTS_TO_WIN - 1) ||
+            scores[1][0] + scores[1][2] >= (POINTS_TO_WIN - 1) ||
+            scores[2][0] + scores[0][2] >= (POINTS_TO_WIN - 1)
+        ) {
             return true
         }
-        else{
+        else {
             return false
         }
     }
@@ -77,7 +114,7 @@ export default class Logic {
     //     [0, 0, 0],
     // ]
     //where integers are the number of continuous adjacent cells of type in this direction
-    getAdjacent(cell,type,board){
+    getAdjacent(cell, type, board) {
         let adjacent = [
             [0, 0, 0],
             [0, 0, 0],
@@ -97,10 +134,9 @@ export default class Logic {
                 if (cell.x + x < 0 || cell.y + y < 0 || cell.x + x >= board.length || cell.y + y >= board[0].length)
                     continue
 
-
                 //if found neighbour
                 if (board[cell.x + x][cell.y + y].value === type) {
-                    adjacent[x+1][y+1] = this.checkForCellsInDirection(board[cell.x + x][cell.y + y], type, 1, x, y)
+                    adjacent[x + 1][y + 1] = this.checkForCellsInDirection(board[cell.x + x][cell.y + y], type, 1, x, y)
 
                 }
             }

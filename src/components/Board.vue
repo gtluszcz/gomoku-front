@@ -2,14 +2,14 @@
     <div>
         <div class="fixed flex items-center justify-between label">
             <div class="text-3xl text-grey-darkest">Turn:</div>
-            <div class="w-10 h-10 bg flex-no-shrink" :class="['bg-o','bg-x'][turn]"></div>
+            <div class="w-10 h-10 bg flex-no-shrink" :class="['bg-o','bg-x'][turn.value]"></div>
         </div>
 
-        <div v-if="gameover !== false" class="fixed z-20 overlay"></div>
-        <div v-if="gameover !== false"
+        <div v-if="gameover.value !== false" class="fixed z-20 overlay"></div>
+        <div v-if="gameover.value !== false"
              class="fixed z-30 flex items-center rounded-full shadow bg-white p-4 pr-16 border border-grey-lightest justify-between win">
             <div class="text-3xl text-grey-darkest">Won:</div>
-            <div class="w-10 h-10 bg flex-no-shrink" :class="['bg-o','bg-x'][gameover]"></div>
+            <div class="w-10 h-10 bg flex-no-shrink" :class="['bg-o','bg-x'][gameover.value]"></div>
         </div>
 
         <div id="board" class="flex flex-col">
@@ -24,6 +24,7 @@
 
 <script>
     import Logic from '../logic.js'
+    import axios from 'axios'
 
     let logic = {}
 
@@ -32,46 +33,19 @@
         data() {
             return {
                 board: [],
-                turn: 0,
-                gameover: false,
+                turn: {value: 0},
+                gameover: {value: false},
             }
         },
         methods: {
             clickOnTile(cell) {
                 if (cell.value === '') {
-                    if (this.turn === 0) {
+                    if (this.turn.value === 0) {
                         //set O in coordinates of cell.x and cell.y
                         const newcell = logic.setO(cell.x,cell.y,logic.o_arr,logic.board)
 
-                        // check if O won
-                        if (logic.checkNeighboursForWin(newcell))
-                            this.gameover = 0
-                        else {
-                            //change turn
-                            this.turn = 1
 
-                            //computing AI move
-                            let cell2 = logic.moveAI()
-                            // check if AI won
-                            if (logic.checkNeighboursForWin(this.board[cell2.x][cell2.y]))
-                                this.gameover = 1
-
-                            //change turn
-                            this.turn = 0
-                        }
                     }
-                    else if (this.turn === 1) {
-                        //set X in coordinates of cell.x and cell.y
-                        const newcell = logic.setX(cell.x,cell.y,logic.x_arr,logic.board)
-
-                        // check if X won
-                        if (logic.checkNeighboursForWin(newcell))
-                            this.gameover = 1
-
-                        //change turn
-                        this.turn = 0
-                    }
-
                 }
             },
         },
@@ -83,8 +57,15 @@
                 }
                 this.board.push(arr)
             }
-            logic = new Logic(this.board)
-            logic.setX(20,20)
+            logic = new Logic(this.board,this.turn,this.gameover)
+            var instance = axios.create({ baseURL: 'http://localhost:8080/gomoku/v1/logic' })
+            instance.get('/newgame/100')
+                .then(function (response) {
+                    console.log(response)
+                })
+                .catch(function (error) {
+                    console.log(error)
+                })
         },
     }
 </script>
